@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Личный кабинет пользователя</title>
+</head>
+<body>
+<h1>Ваши результаты тестов</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Название теста</th>
+        <th>Правильных ответов</th>
+        <th>Всего вопросов</th>
+        <th>Процент правильных ответов</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="result : ${results}">
+        <td th:text="${result.test.name}">Название теста</td>
+        <td th:text="${result.correctAnswers}">0</td>
+        <td th:text="${result.totalQuestions}">0</td>
+        <td th:text="${result.percentage}">0</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

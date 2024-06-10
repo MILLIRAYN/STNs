@@ -2,18 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Авторизация</title>
+
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f8ff; /* Светло-голубой фон */
+            background-color: #f0f8ff;
             margin: 0;
             font-family: Arial, sans-serif;
         }
         .login-container {
-            background-color: #e6f7ff; /* Более светлый голубой фон для формы */
+            background-color: #e6f7ff;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -22,7 +23,7 @@
         }
         .login-container h1 {
             margin-bottom: 20px;
-            color: #0073e6; /* Синий цвет для заголовка */
+            color: #0073e6;
         }
         .login-container div {
             margin-bottom: 15px;
@@ -31,19 +32,19 @@
         .login-container label {
             display: block;
             margin-bottom: 5px;
-            color: #005bb5; /* Более тёмный синий для меток */
+            color: #005bb5;
         }
         .login-container input {
-            width: 100%; /* Учёт padding и border */
+            width: 100%;
             padding: 10px;
             border: 1px solid #0073e6;
             border-radius: 5px;
-            box-sizing: border-box; /* Чтобы padding и border входили в ширину */
+            box-sizing: border-box;
         }
         .login-container button {
             width: 100%;
             padding: 10px;
-            background-color: #0073e6; /* Синий цвет для кнопки */
+            background-color: #0073e6;
             border: none;
             border-radius: 5px;
             color: white;
@@ -51,14 +52,14 @@
             cursor: pointer;
         }
         .login-container button:hover {
-            background-color: #005bb5; /* Более тёмный синий для кнопки при наведении */
+            background-color: #005bb5;
         }
     </style>
 </head>
 <body>
 <div class="login-container">
     <h1>Авторизация</h1>
-    <form th:action="@{/login}" method="post">
+    <form id="loginForm">
         <div>
             <label for="username">Логин:</label>
             <input type="text" id="username" name="username"/>
@@ -67,7 +68,6 @@
             <label for="password">Пароль:</label>
             <input type="password" id="password" name="password"/>
         </div>
-
         <div>
             <button type="submit">Войти</button>
         </div>
@@ -76,5 +76,29 @@
         </div>
     </form>
 </div>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const response = await fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: formData.get('username'),
+                password: formData.get('password')
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            window.location.href = '/home';
+        } else {
+            alert('Неправильный логин или пароль');
+        }
+    });
+</script>
 </body>
 </html>

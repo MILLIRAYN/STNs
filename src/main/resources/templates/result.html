@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Результат теста</title>
+</head>
+<body>
+<h1>Результаты теста</h1>
+<p>Правильных ответов: <span th:text="${correctAnswers}">0</span> из <span th:text="${totalQuestions}">0</span></p>
+<p>Процент правильных ответов: <span th:text="${percentage}">0</span>%</p>
+<a href="/home">Вернуться на главную</a>
+</body>
+</html>

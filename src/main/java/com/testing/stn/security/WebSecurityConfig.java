@@ -24,10 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-// (securedEnabled = true,
-// jsr250Enabled = true,
-// prePostEnabled = true) // by default
-public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
@@ -42,10 +39,8 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 
@@ -63,22 +58,17 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//                .authorizeHttpRequests(auth ->
-//                        auth.requestMatchers("/api/auth/**").permitAll()
-//                                .requestMatchers("/api/test/**").permitAll()
-//                                .anyRequest().authenticated()
-//                );
-
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers("/api/auth/**", "/login").permitAll()
+                                .requestMatchers("/home", "/test/**").authenticated()
+                                .requestMatchers("/upload").hasAnyRole("MODERATOR", "ADMIN")
+                                .anyRequest().permitAll()
+                );
 
         http.authenticationProvider(authenticationProvider());
-
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
-
-
-
-

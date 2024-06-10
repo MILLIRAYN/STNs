@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прохождение теста</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .content {
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: left;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question h3 {
+            margin-bottom: 10px;
+        }
+    </style>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let timer;
+        let timeRemaining = /*[[${test.duration}]]*/;
+
+        function startTimer() {
+            timer = setInterval(() => {
+                document.getElementById('timer').textContent = timeRemaining;
+                timeRemaining--;
+                if (timeRemaining < 0) {
+                    clearInterval(timer);
+                    submitTest();
+                }
+            }, 1000);
+        }
+
+        function submitTest() {
+            document.getElementById('testForm').submit();
+        }
+
+        document.addEventListener('DOMContentLoaded', startTimer);
+        /*]]>*/
+    </script>
+</head>
+<body>
+<div id="timer" th:text="${test.duration}">60</div>
+<div class="content">
+    <form id="testForm" th:action="@{/test/submit}" method="post">
+        <input type="hidden" name="testId" th:value="${test.id}" />
+        <div th:each="question, index : ${test.questions}" class="question">
+            <h3 th:text="${question.question}">Question text</h3>
+            <div>
+                <label>
+                    <input type="radio" th:name="'answers[' + ${index} + ']'" th:value="${question.option1}"/>
+                    <span th:text="${question.option1}">Option 1</span>
+                </label><br/>
+                <label>
+                    <input type="radio" th:name="'answers[' + ${index} + ']'" th:value="${question.option2}"/>
+                    <span th:text="${question.option2}">Option 2</span>
+                </label><br/>
+                <label>
+                    <input type="radio" th:name="'answers[' + ${index} + ']'" th:value="${question.option3}"/>
+                    <span th:text="${question.option3}">Option 3</span>
+                </label><br/>
+                <label>
+                    <input type="radio" th:name="'answers[' + ${index} + ']'" th:value="${question.option4}"/>
+                    <span th:text="${question.option4}">Option 4</span>
+                </label><br/>
+            </div>
+        </div>
+        <button type="button" onclick="submitTest()">Завершить тест</button>
+    </form>
+</div>
+
+
+</body>
+</html>

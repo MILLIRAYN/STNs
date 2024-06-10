@@ -11,7 +11,7 @@ import com.testing.stn.repository.RoleRepository;
 import com.testing.stn.repository.UserRepository;
 import com.testing.stn.security.jwt.JwtUtils;
 import com.testing.stn.security.services.UserDetailsImpl;
-import com.testing.stn.service.AuthService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//@CrossOrigin(origins = "*", maxAge = 3600)
-//@RestController
-@Controller
-@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
     AuthenticationManager authenticationManager;
@@ -52,49 +50,21 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
-    private final AuthService authService;
+    @PostMapping("/signin")
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-    @GetMapping("/login")
-    public String showLoginPage() {
-        return "index";
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
     }
-
-    @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password, Model model) {
-        try {
-            authService.authenticate(username, password);
-            return "redirect:/home";
-        } catch (AuthenticationException e) {
-            model.addAttribute("error", "im gay");
-            return "index";
-        }
-    }
-
-//    @GetMapping("/")
-//    public String authenticateUser(Model model) {
-//        model.addAttribute("loginRequest", new LoginRequest());
-//        return "index";
-//    }
-//
-//    @PostMapping("/signin")
-//    public String authenticateUser(LoginRequest loginRequest) {
-//
-//        Authentication authentication = authenticationManager
-//                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-//
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//        String jwt = jwtUtils.generateJwtToken(authentication);
-//
-//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-//                .collect(Collectors.toList());
-//
-//
-//        return "redirect:/home";
-//
-////        return ResponseEntity
-////                .ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
-//    }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
@@ -146,3 +116,4 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 }
+
